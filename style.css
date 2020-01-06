@@ -1,0 +1,43 @@
+/* * {
+    box-sizing: border-box;
+} */
+
+#calculator {
+    display: grid;
+    grid-template-rows: 1fr 4fr;
+    height: 400px;
+    width: 250px;
+    border: 1px solid black;
+}
+
+#screen {
+    border: 1px solid black;
+    text-align: end;
+    font-size: 20px;
+}
+
+#buttons {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+}
+
+#numbersContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+}
+
+.numbers,
+.operators,
+#delete,
+#clear {
+    border: 1px solid black;
+    text-align: center;
+    padding-top: 20px;
+}
+
+#operatorsContainer {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(5, 1fr);
+}
