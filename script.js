@@ -7,57 +7,55 @@ let xString = "";
 let history = "";
 
 
+document.addEventListener('keydown', function(event) {
+    let key = event.key;
+    console.log(key);
+    let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
+    let operators = ["+", "-", "/", "*"];
+    for (let i = 0; i < numbers.length; i++) {
+        if (numbers[i] === key) {
+            buildString(key);
+        }
+    }
+    for (let i = 0; i < operators.length; i++) {
+        if (operators[i] === key) {
+            pushString(key);
+        }
+    }
+    if (key === "Backspace") {
+        backspace();
+    }
+    if (key === "Enter") {
+        finalize();
+    }
+});
 
 for (let i = 0; i < numberButtons.length; i++) {
     numberButtons[i].addEventListener('click', function() {
-        history += this.textContent;
-        xString += this.textContent;
-        screen.textContent += this.textContent;
+        buildString(this.textContent);
     });
 }
+
 
 for (let i = 0; i < operatorButtons.length; i++) {
     operatorButtons[i].addEventListener('click', function() {
-        if (xString === "") {
-            if (this.textContent == "-") {
-                xString += "-"
-            } else if (this.textContent == "+") {
-                xString = "";
-            } else {
-                alert("you done fucked up");
-                clear();
-            }
-        } else {
-            console.log(xString);
-            inputNumbers.push(Number(xString));
-            inputNumbers.push(this.textContent);
-            xString = "";
-        }
-        history += this.textContent;
-        screen.textContent = history;
+        pushString(this.textContent);
     });
 }
 
+
 let equals = document.querySelector('#equals');
 equals.addEventListener('click', function() {
+    finalize();
+});
+
+function finalize() {
     inputNumbers.push(Number(xString));
     console.log(inputNumbers);
     let finalAnswer = solve(inputNumbers);
     screen.textContent = history + " = " + finalAnswer;
-    console.log(finalAnswer);
     history = "";
-});
-
-// let subtraction = document.querySelector('#subtract');
-// subtraction.addEventListener('click', function() {
-//     screen.textContent += this.textContent;
-//     history += this.textContent;
-//     if (xString !== "") {
-//         inputNumbers.push(Number(xString));
-//     }
-//     inputNumbers.push("-");
-//     xString = "";
-// });
+}
 
 let clearButton = document.querySelector('#clear');
 clearButton.addEventListener('click', function() {
@@ -69,7 +67,56 @@ clearButton.addEventListener('click', function() {
     intermediateAnswer = 0;
 });
 
+let backSpaceButton = document.querySelector('#delete');
+backSpaceButton.addEventListener('click', backspace);
+
+function backspace() {
+    if (xString === "") {
+        if (inputNumbers.length > 0) {
+            inputNumbers.pop();
+            console.log("last element: " + inputNumbers[inputNumbers.length - 1]);
+            console.log(typeof(inputNumbers[inputNumbers.length - 1]));
+            xString = inputNumbers[inputNumbers.length - 1].toString();
+            inputNumbers.pop();
+            console.log("xString = " + xString);
+        }
+    } else {
+        xString = xString.slice(0, -1);
+        console.log("xString = " + xString);
+    }
+    history = history.slice(0, -1);
+    screen.textContent = history;
+    console.log(inputNumbers);
+}
+
 // functions
+function pushString(operator) {
+    if (xString === "") {
+        if (operator == "-") {
+            xString += "-"
+        } else if (operator == "+") {
+            xString = "";
+        } else {
+            alert("you done fucked up");
+            clear();
+        }
+    } else {
+        inputNumbers.push(Number(xString));
+        inputNumbers.push(operator);
+        xString = "";
+    }
+    history += operator;
+    screen.textContent = history;
+    console.log(inputNumbers);
+}
+
+function buildString(numberString) {
+    history += numberString;
+    xString += numberString;
+    screen.textContent += numberString;
+    console.log(inputNumbers);
+}
+
 function solve(arr) {
     if (arr.length === 1) {
         return arr[0];
