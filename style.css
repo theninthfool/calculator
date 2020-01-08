@@ -30,7 +30,8 @@
 .numbers,
 .operators,
 #delete,
-#clear {
+#clear,
+#equals {
     border: 1px solid black;
     text-align: center;
     padding-top: 20px;
@@ -39,5 +40,10 @@
 #operatorsContainer {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+}
+
+.button:hover {
+    color: orange;
+    background: black;
 }
