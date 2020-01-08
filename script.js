@@ -4,17 +4,15 @@ let screen = document.querySelector("#screen");
 let inputNumbers = [];
 let intermediateAnswer = 0;
 let xString = "";
-let history = "";
 
 
 document.addEventListener('keydown', function(event) {
     let key = event.key;
-    console.log(key);
     let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
     let operators = ["+", "-", "/", "*"];
     for (let i = 0; i < numbers.length; i++) {
         if (numbers[i] === key) {
-            buildString(key);
+            buildxString(key);
         }
     }
     for (let i = 0; i < operators.length; i++) {
@@ -32,7 +30,7 @@ document.addEventListener('keydown', function(event) {
 
 for (let i = 0; i < numberButtons.length; i++) {
     numberButtons[i].addEventListener('click', function() {
-        buildString(this.textContent);
+        buildxString(this.textContent);
     });
 }
 
@@ -51,17 +49,17 @@ equals.addEventListener('click', function() {
 
 function finalize() {
     inputNumbers.push(Number(xString));
+    let history = inputNumbers.join("");
     console.log(inputNumbers);
     let finalAnswer = solve(inputNumbers);
     screen.textContent = history + " = " + finalAnswer;
-    history = "";
+    inputNumbers = [];
 }
 
 let clearButton = document.querySelector('#clear');
 clearButton.addEventListener('click', function() {
     xString = "";
     screen.textContent = "";
-    history = "";
     operator = "";
     inputNumbers = [];
     intermediateAnswer = 0;
@@ -71,49 +69,43 @@ let backSpaceButton = document.querySelector('#delete');
 backSpaceButton.addEventListener('click', backspace);
 
 function backspace() {
-    if (xString === "") {
-        if (inputNumbers.length > 0) {
+    if (xString !== "" || inputNumbers.length > 0) {
+        if (xString.length > 0) {
+            xString = xString.slice(0, -1);
+        } else {
             inputNumbers.pop();
-            console.log("last element: " + inputNumbers[inputNumbers.length - 1]);
-            console.log(typeof(inputNumbers[inputNumbers.length - 1]));
-            xString = inputNumbers[inputNumbers.length - 1].toString();
-            inputNumbers.pop();
-            console.log("xString = " + xString);
+            let lastElement = inputNumbers[inputNumbers.length - 1];
+            if (!isNaN(lastElement)) {
+                xString = inputNumbers.pop().toString();
+            }
         }
-    } else {
-        xString = xString.slice(0, -1);
         console.log("xString = " + xString);
+        console.log(inputNumbers);
+        screen.textContent = inputNumbers.join("") + xString;
     }
-    history = history.slice(0, -1);
-    screen.textContent = history;
-    console.log(inputNumbers);
 }
 
 // functions
 function pushString(operator) {
     if (xString === "") {
-        if (operator == "-") {
-            xString += "-"
-        } else if (operator == "+") {
-            xString = "";
-        } else {
-            alert("you done fucked up");
-            clear();
-        }
-    } else {
+        buildxString(operator);
+    } else if (!isNaN(xString)) {
+        console.log("xString pushed= " + xString);
         inputNumbers.push(Number(xString));
         inputNumbers.push(operator);
         xString = "";
+    } else {
+        buildxString(operator)
     }
-    history += operator;
-    screen.textContent = history;
+    console.log("current xString: " + xString);
+    screen.textContent = inputNumbers.join("") + xString;
     console.log(inputNumbers);
 }
 
-function buildString(numberString) {
-    history += numberString;
-    xString += numberString;
-    screen.textContent += numberString;
+function buildxString(input) {
+    xString += input;
+    console.log("current xString: " + xString);
+    screen.textContent = inputNumbers.join("") + xString;
     console.log(inputNumbers);
 }
 
@@ -155,38 +147,19 @@ function updateArray(arr, j) {
 function clear() {
     xString = "";
     screen.textContent = "";
-    history = "";
-    operator = "";
     inputNumbers = [];
     intermediateAnswer = 0;
 }
 
-function add(x, y) {
-    return x + y;
-}
-
-function subtract(x, y) {
-    return x - y;
-}
-
-function multiply(x, y) {
-    return x * y;
-}
-
-function divide(x, y) {
-    return x / y;
-}
-
 function operate(operator, x, y) {
     if (operator === "+") {
-        return add(x, y);
+        return x + y
     } else if (operator === "*") {
-        return multiply(x, y);
+        return x * y
     } else if (operator === "/") {
-        return divide(x, y);
+        return x / y
     } else if (operator === "-") {
-        return subtract(x, y);
+        return x - y
     }
 }
-
 // --functions
