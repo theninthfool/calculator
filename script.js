@@ -1,47 +1,43 @@
 let buttons = Array.from(document.querySelectorAll(".button"));
 let screen = document.querySelector("#screen");
 let inputNumbers = [];
-let intermediateAnswer = 0;
-let previousLength = 0;
 let xString = "";
 
-document.addEventListener('keyup', function(event) {
+document.addEventListener('keyup', event => {
     let key = event.key
     buttons.forEach(button => {
         if (button.textContent === key) button.classList.remove("pressed");
     });
 })
 
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', event => {
     let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
     let operators = ["+", "-", "/", "*", "(", ")"];
     let key = event.key;
     buttons.forEach(button => {
-        if (button.textContent === key) button.classList.add("pressed");
+        if (key === button.textContent) button.classList.add("pressed");
     });
 
     if (numbers.includes(key)) buildxString(key);
-
     if (operators.includes(key)) pushString(key);
 
     if (key === "Backspace") backspace();
-
     if (key === "Enter") finalize();
 });
 
 let numberButtons = Array.from(document.querySelectorAll(".numbers"));
-for (let i = 0; i < numberButtons.length; i++) {
-    numberButtons[i].addEventListener('click', function() {
-        buildxString(this.textContent);
+numberButtons.forEach(numberButton => {
+    numberButton.addEventListener('click', () => {
+        buildxString(numberButton.textContent);
     });
-}
+});
 
 let operatorButtons = Array.from(document.querySelectorAll(".operators"));
-for (let i = 0; i < operatorButtons.length; i++) {
-    operatorButtons[i].addEventListener('click', function() {
-        pushString(this.textContent);
+operatorButtons.forEach(operatorButton => {
+    operatorButton.addEventListener('click', () => {
+        pushString(operatorButton.textContent);
     });
-}
+});
 
 let equals = document.querySelector('#equals');
 equals.addEventListener('click', finalize);
@@ -55,10 +51,7 @@ backSpaceButton.addEventListener('click', backspace);
 
 // functions
 function finalize() {
-    if (xString !== "") {
-        inputNumbers.push(Number(xString));
-        xString = "";
-    }
+    if (xString !== "") inputNumbers.push(Number(xString));
     console.log(inputNumbers);
     screen.textContent = inputNumbers.join("") + " = " + solve(inputNumbers);
     xString = "";
@@ -72,11 +65,8 @@ function backspace() {
         } else {
             inputNumbers.pop();
             let lastElement = inputNumbers[inputNumbers.length - 1];
-            if (!isNaN(lastElement)) {
-                xString = inputNumbers.pop().toString();
-            }
+            if (!isNaN(lastElement)) xString = inputNumbers.pop().toString();
         }
-
         console.log("xString = " + xString);
         console.log(inputNumbers);
         screen.textContent = inputNumbers.join("") + xString;
@@ -84,14 +74,10 @@ function backspace() {
 }
 
 function pushString(operator) {
-    if (!isNaN(xString) && xString !== "") {
-        inputNumbers.push(Number(xString));
-        console.log("xString pushed= " + xString);
-        // inputNumbers.push(operator);
-        xString = "";
-    }
-    inputNumbers.push(operator);
+    if (!isNaN(xString) && xString !== "") inputNumbers.push(Number(xString));
 
+    xString = "";
+    inputNumbers.push(operator);
     console.log("current xString: " + xString);
     screen.textContent = inputNumbers.join("") + xString;
     console.log(inputNumbers);
@@ -106,41 +92,30 @@ function buildxString(input) {
 
 function solve(arr) {
     console.log(arr);
-    if (arr.includes(NaN)) {
-        return "NaN Error"
-    }
+    if (arr.includes(NaN)) return "NaN Error";
 
     if ((arr[0] === "-" || arr[0] === "+") && !isNaN(arr[1])) {
-        if (arr[0] === "-") {
-            arr[1] = -arr[1];
-        }
-        arr.shift();
+        if (arr[0] === "-") return solve([-arr[1]].concat(arr.slice(2)));
+        return solve(arr.slice(1));
     }
 
     if (arr.length === 1) {
-        if (isNaN(arr[0])) {
-            return "Weird Error"
-        } else {
-            return arr[0];
-        }
+        if (isNaN(arr[0])) return "Weird Error";
+        return arr[0];
     } else if (arr.length === 2) {
-        return "Error";
+        return "Two Error";
     } else {
-        let closingParenIndex = arr.indexOf(")");
-        if (closingParenIndex > -1) {
-            solveParenthesis(arr, closingParenIndex);
-            return solve(arr);
+        if (arr.indexOf(")") > -1) {
+            return solve(solveParenthesis(arr, arr.indexOf(")")));
         } else {
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i] === "*" || arr[i] === "/") {
-                    updateArray(arr, i);
-                    return solve(arr);
+                    return solve(updateArray(arr, i));
                 }
             }
             for (let i = 1; i < arr.length; i++) {
                 if (arr[i] === "+" || arr[i] === "-") {
-                    updateArray(arr, i);
-                    return solve(arr);
+                    return solve(updateArray(arr, i));
                 }
             }
         }
@@ -148,21 +123,17 @@ function solve(arr) {
 }
 
 function solveParenthesis(arr, index) {
-    let openingParenIndex = 0;
     for (let i = index; i >= 0; i--) {
         if (arr[i] === "(") {
-            openingParenIndex = i;
-            break;
+            let answer = solve(arr.slice(i + 1, index));
+            return arr.slice(0, i).concat(answer, arr.slice(index + 1));
         }
     }
-    let newArr = arr.slice(openingParenIndex + 1, index);
-    let partialAnswer = solve(newArr);
-    arr.splice(openingParenIndex, index - openingParenIndex + 1, partialAnswer);
 }
 
 function updateArray(arr, j) {
-    intermediateAnswer = operate(arr[j], arr[j - 1], arr[j + 1])
-    arr.splice(j - 1, 3, intermediateAnswer);
+    let intermediateAnswer = operate(arr[j], arr[j - 1], arr[j + 1])
+    return arr.slice(0, j - 1).concat(intermediateAnswer, arr.slice(j + 2));
 }
 
 function clear() {
