@@ -4,41 +4,29 @@ let inputNumbers = [];
 let intermediateAnswer = 0;
 let previousLength = 0;
 let xString = "";
-let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
-let operators = ["+", "-", "/", "*", "(", ")"];
 
 document.addEventListener('keyup', function(event) {
     let key = event.key
     buttons.forEach(button => {
-        if (button.textContent === key) {
-            button.classList.remove("pressed");
-        }
+        if (button.textContent === key) button.classList.remove("pressed");
     });
 })
 
 document.addEventListener('keydown', function(event) {
+    let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
+    let operators = ["+", "-", "/", "*", "(", ")"];
     let key = event.key;
-    for (let i = 0; i < buttons.length; i++) {
-        if (buttons[i].textContent === key) {
-            buttons[i].classList.add("pressed");
-        }
-    }
-    for (let i = 0; i < numbers.length; i++) {
-        if (numbers[i] === key) {
-            buildxString(key);
-        }
-    }
-    for (let i = 0; i < operators.length; i++) {
-        if (operators[i] === key) {
-            pushString(key);
-        }
-    }
-    if (key === "Backspace") {
-        backspace();
-    }
-    if (key === "Enter") {
-        finalize();
-    }
+    buttons.forEach(button => {
+        if (button.textContent === key) button.classList.add("pressed");
+    });
+
+    if (numbers.includes(key)) buildxString(key);
+
+    if (operators.includes(key)) pushString(key);
+
+    if (key === "Backspace") backspace();
+
+    if (key === "Enter") finalize();
 });
 
 let numberButtons = Array.from(document.querySelectorAll(".numbers"));
@@ -67,7 +55,6 @@ backSpaceButton.addEventListener('click', backspace);
 
 // functions
 function finalize() {
-    console.log("xString pushed= " + xString);
     if (xString !== "") {
         inputNumbers.push(Number(xString));
         xString = "";
