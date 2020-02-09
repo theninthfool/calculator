@@ -20,7 +20,6 @@ document.addEventListener('keydown', event => {
 
     if (numbers.includes(key)) buildxString(key);
     if (operators.includes(key)) pushString(key);
-
     if (key === "Backspace") backspace();
     if (key === "Enter") finalize();
 });
