@@ -1,50 +1,50 @@
-let buttons = Array.from(document.querySelectorAll(".button"));
 let screen = document.querySelector("#screen");
 let inputNumbers = [];
 let xString = "";
 
-document.addEventListener('keyup', event => {
-    let key = event.key
-    buttons.forEach(button => {
-        if (button.textContent === key) button.classList.remove("pressed");
-    });
-})
-
 document.addEventListener('keydown', event => {
+    let buttons = document.querySelectorAll(".button");
     let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
     let operators = ["+", "-", "/", "*", "(", ")"];
     let key = event.key;
+    if (key === "Enter") key = '=';
     buttons.forEach(button => {
-        if (key === button.textContent) button.classList.add("pressed");
+        if (key === button.getAttribute('id')) {
+            button.classList.add("pressed");
+            document.addEventListener('keyup', () => {
+                button.classList.remove("pressed");
+            });
+        }
+
     });
 
     if (numbers.includes(key)) buildxString(key);
     if (operators.includes(key)) pushString(key);
     if (key === "Backspace") backspace();
-    if (key === "Enter") finalize();
+    if (key === "=") finalize();
 });
 
-let numberButtons = Array.from(document.querySelectorAll(".numbers"));
+let numberButtons = document.querySelectorAll(".numbers");
 numberButtons.forEach(numberButton => {
     numberButton.addEventListener('click', () => {
         buildxString(numberButton.textContent);
     });
 });
 
-let operatorButtons = Array.from(document.querySelectorAll(".operators"));
+let operatorButtons = document.querySelectorAll(".operators");
 operatorButtons.forEach(operatorButton => {
     operatorButton.addEventListener('click', () => {
         pushString(operatorButton.textContent);
     });
 });
 
-let equals = document.querySelector('#equals');
+let equals = document.querySelector('.equals');
 equals.addEventListener('click', finalize);
 
 let clearButton = document.querySelector('#clear');
 clearButton.addEventListener('click', clear);
 
-let backSpaceButton = document.querySelector('#delete');
+let backSpaceButton = document.querySelector('#Backspace');
 backSpaceButton.addEventListener('click', backspace);
 
 
@@ -77,16 +77,12 @@ function pushString(operator) {
 
     xString = "";
     inputNumbers.push(operator);
-    console.log("current xString: " + xString);
     screen.textContent = inputNumbers.join("") + xString;
-    console.log(inputNumbers);
 }
 
 function buildxString(input) {
     xString += input;
-    console.log("current xString: " + xString);
     screen.textContent = inputNumbers.join("") + xString;
-    console.log(inputNumbers);
 }
 
 function solve(arr) {

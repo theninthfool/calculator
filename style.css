@@ -37,7 +37,7 @@ h1 {
 #numbersContainer {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
 }
 
 .button {
@@ -48,6 +48,7 @@ h1 {
     border-radius: 10px;
     font-size: 23px;
     font-weight: bold;
+    transition: all .3s;
 }
 
 #operatorsContainer {
