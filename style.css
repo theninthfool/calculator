@@ -48,7 +48,7 @@ h1 {
     border-radius: 10px;
     font-size: 23px;
     font-weight: bold;
-    transition: all .3s;
+    transition: .25s;
 }
 
 #operatorsContainer {
