@@ -1,24 +1,25 @@
-let screen = document.querySelector("#screen");
-let inputNumbers = [];
-let xString = "";
-init();
-
-function init() {
-    addListeners();
-}
-
+addListeners();
 
 function addListeners() {
+    let nums = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
+    let ops = ["+", "-", "/", "*", "(", ")"];
+    let controls = ['Backspace', 'clear', 'Enter', '='];
+    let data = { xString: '', inputNumbers: [] };
+    updateScreen(data, false);
     let buttons = document.querySelector("#buttons");
     buttons.addEventListener('click', e => {
         let id = e.target.getAttribute('id');
-        checkInput(id);
+        data = checkInput(id, data, nums, ops);
+        console.log(data);
     });
     document.addEventListener('keydown', e => {
         let key = e.key;
-        if (key === "Enter") key = '=';
-        checkInput(key);
-        keyPressed(key);
+        if (nums.includes(key) || ops.includes(key) || controls.includes(key)) {
+            if (key == 'Enter') key = '=';
+            keyPressed(key);
+            data = checkInput(key, data, nums, ops);
+            console.log(data);
+        }
     });
 }
 
@@ -32,47 +33,71 @@ function keyPressed(id) {
     }
 }
 
-function checkInput(input) {
-    let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
-    let operators = ["+", "-", "/", "*", "(", ")"];
-    if (numbers.includes(input)) buildxString(input);
-    if (operators.includes(input)) pushString(input);
-    if (input === "Backspace") backspace();
-    if (input === "=") finalize();
-    if (input === 'clear') clear();
-}
-
-function finalize() {
-    if (xString !== "") inputNumbers.push(Number(xString));
-    screen.textContent = inputNumbers.join("") + " = " + solve(inputNumbers);
-    xString = "";
-    inputNumbers = [];
-}
-
-function backspace() {
-    if (xString !== "" || inputNumbers.length > 0) {
-        if (xString.length > 0) {
-            xString = xString.slice(0, -1);
-        } else {
-            inputNumbers.pop();
-            let lastElement = inputNumbers[inputNumbers.length - 1];
-            if (!isNaN(lastElement)) xString = inputNumbers.pop().toString();
-        }
-        screen.textContent = inputNumbers.join("") + xString;
+function updateScreen(data, flag) {
+    let screen = document.querySelector("#screen");
+    let arr = data.inputNumbers;
+    if (flag) {
+        screen.textContent = arr.join("") + " = " + solve(arr);
+    } else {
+        screen.textContent = arr.join('') + data.xString;
     }
 }
 
-function pushString(operator) {
-    if (!isNaN(xString) && xString !== "") inputNumbers.push(Number(xString));
 
-    xString = "";
-    inputNumbers.push(operator);
-    screen.textContent = inputNumbers.join("") + xString;
+
+function checkInput(input, data, nums, ops) {
+    let newData;
+    if (nums.includes(input)) {
+        newData = {
+            xString: data.xString + input,
+            inputNumbers: data.inputNumbers
+        }
+    } else if (ops.includes(input)) {
+        newData = pushString(input, data);
+    } else if (input === "Backspace") {
+        newData = backspace(data);
+    } else if (input === "clear") {
+        newData = { xString: '', inputNumbers: [] }
+    } else if (input === '=') {
+        updateScreen(finalize(data), true);
+        return { xString: '', inputNumbers: [] }
+    }
+    updateScreen(newData, false);
+    return newData;
 }
 
-function buildxString(input) {
-    xString += input;
-    screen.textContent = inputNumbers.join("") + xString;
+function finalize(data) {
+    if (data.xString !== "") {
+        let newArr = data.inputNumbers.concat(Number(data.xString));
+        return { xString: '', inputNumbers: newArr }
+    }
+    return { xString: '', inputNumbers: data.inputNumbers }
+}
+
+function backspace(data) {
+    let str;
+    let arr = data.inputNumbers;
+    if (data.xString !== "" || arr.length > 0) {
+        if (data.xString.length > 0) {
+            str = data.xString.slice(0, -1);
+        } else {
+            arr.pop();
+            let lastElement = arr[arr.length - 1];
+            (!isNaN(lastElement)) ? str = arr.pop().toString(): str = '';
+        }
+        return { xString: str, inputNumbers: arr };
+    } else {
+        return { xString: '', inputNumbers: [] };
+    }
+}
+
+function pushString(operator, data) {
+    let arr = data.inputNumbers;
+    if (!isNaN(data.xString) && data.xString !== "") {
+        arr.push(Number(data.xString))
+    }
+    arr.push(operator);
+    return { xString: '', inputNumbers: arr };
 }
 
 function solve(arr) {
@@ -118,12 +143,6 @@ function solveParenthesis(arr, index) {
 function updateArray(arr, j) {
     let intermediateAnswer = operate(arr[j], arr[j - 1], arr[j + 1])
     return arr.slice(0, j - 1).concat(intermediateAnswer, arr.slice(j + 2));
-}
-
-function clear() {
-    xString = "";
-    screen.textContent = "";
-    inputNumbers = [];
 }
 
 function operate(operator, x, y) {
