@@ -2,15 +2,14 @@ addListeners();
 
 function addListeners() {
     let nums = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
-    let ops = ["+", "-", "/", "*", "(", ")"];
-    let controls = ['Backspace', 'clear', 'Enter', '='];
+    let ops = ["+", "-", "/", "*", "(", ")", '='];
+    let controls = ['Backspace', 'clear', 'Enter'];
     let data = { xString: '', inputNumbers: [] };
     updateScreen(data, false);
     let buttons = document.querySelector("#buttons");
     buttons.addEventListener('click', e => {
         let id = e.target.getAttribute('id');
         data = checkInput(id, data, nums, ops);
-        console.log(data);
     });
     document.addEventListener('keydown', e => {
         let key = e.key;
@@ -18,7 +17,6 @@ function addListeners() {
             if (key == 'Enter') key = '=';
             keyPressed(key);
             data = checkInput(key, data, nums, ops);
-            console.log(data);
         }
     });
 }
@@ -37,16 +35,20 @@ function updateScreen(data, flag) {
     let screen = document.querySelector("#screen");
     let arr = data.inputNumbers;
     if (flag) {
-        screen.textContent = arr.join("") + " = " + solve(arr);
+        screen.textContent = arr.join('') + " = " + solve(arr);
+        data = { xString: '', inputNumbers: [] };
     } else {
         screen.textContent = arr.join('') + data.xString;
     }
+    return data;
 }
 
 
 
 function checkInput(input, data, nums, ops) {
-    let newData;
+    let newData = {};
+    let flag = false;
+    if (input === '=') flag = true;
     if (nums.includes(input)) {
         newData = {
             xString: data.xString + input,
@@ -55,46 +57,48 @@ function checkInput(input, data, nums, ops) {
     } else if (ops.includes(input)) {
         newData = pushString(input, data);
     } else if (input === "Backspace") {
-        newData = backspace(data);
+        newData = backspace(data, ops);
     } else if (input === "clear") {
         newData = { xString: '', inputNumbers: [] }
-    } else if (input === '=') {
-        updateScreen(finalize(data), true);
-        return { xString: '', inputNumbers: [] }
     }
-    updateScreen(newData, false);
-    return newData;
+    console.log(newData.xString);
+    console.log(newData.inputNumbers);
+    return updateScreen(newData, flag);
 }
 
-function finalize(data) {
-    if (data.xString !== "") {
-        let newArr = data.inputNumbers.concat(Number(data.xString));
-        return { xString: '', inputNumbers: newArr }
-    }
-    return { xString: '', inputNumbers: data.inputNumbers }
-}
-
-function backspace(data) {
-    let str;
-    let arr = data.inputNumbers;
-    if (data.xString !== "" || arr.length > 0) {
-        if (data.xString.length > 0) {
-            str = data.xString.slice(0, -1);
+function finalize(arr) {
+    let newArr = arr.map(function(item) {
+        if (Number(item) || item === '0') {
+            return Number(item);
         } else {
-            arr.pop();
-            let lastElement = arr[arr.length - 1];
-            (!isNaN(lastElement)) ? str = arr.pop().toString(): str = '';
+            return item;
         }
-        return { xString: str, inputNumbers: arr };
-    } else {
-        return { xString: '', inputNumbers: [] };
+    });
+    console.log("New Array", newArr);
+    return { xString: '', inputNumbers: newArr }
+}
+
+function backspace(data, ops) {
+    let str = '';
+    let arr = data.inputNumbers;
+    if (data.xString !== "") {
+        str = data.xString.slice(0, -1);
+    } else if (arr.length > 0) {
+        arr.pop();
+        if (!ops.includes(arr[arr.length - 1])) {
+            str = arr.pop();
+        }
     }
+    return { xString: str, inputNumbers: arr };
 }
 
 function pushString(operator, data) {
     let arr = data.inputNumbers;
-    if (!isNaN(data.xString) && data.xString !== "") {
-        arr.push(Number(data.xString))
+    if (data.xString.length > 0) {
+        arr.push(data.xString);
+    }
+    if (operator === '=') {
+        return finalize(arr)
     }
     arr.push(operator);
     return { xString: '', inputNumbers: arr };
